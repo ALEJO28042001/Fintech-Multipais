@@ -1,20 +1,20 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime,timezone
 from uuid import uuid4
 
 from core.credit_applications.enums import Country, ApplicationStatus
 
 @dataclass(frozen=True)
 class CoreEvent:
-    """
-    Base class for all core events.
-    """
     id: str
     occurred_at: datetime
 
     @staticmethod
-    def new_event_id() -> str:
-        return str(uuid4())
+    def new():
+        return {
+            "id": str(uuid4()),
+            "occurred_at": datetime.now(timezone.utc),
+        }
 
 """
 Specific Events for Application states

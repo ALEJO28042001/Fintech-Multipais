@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime,timezone
 from uuid import uuid4
 from decimal import Decimal
+from typing import Optional
+
 from core.credit_applications.events import CoreEvent
-
-
 from core.credit_applications.enums import (
     Country,
     ApplicationStatus,
@@ -36,6 +36,12 @@ class BankSnapshot:
         default_factory=lambda: datetime.now(timezone.utc)
     )
 
+@dataclass(frozen=True)
+class ApplicationStatusChanged(CoreEvent):
+    application_id: str
+    previous_status: ApplicationStatus
+    new_status: ApplicationStatus
+
 @dataclass
 class CreditApplication:
     """
@@ -46,6 +52,10 @@ class CreditApplication:
     applicant: Applicant
     requested_amount: Money
     monthly_income: Income
+    bank_snapshot: Optional[BankSnapshot] = field(
+        default=None,
+        repr=False,
+    )
     status: ApplicationStatus = field(
             default=ApplicationStatus.CREATED,
             init=False
@@ -60,18 +70,32 @@ class CreditApplication:
         """
         if not self._can_transition(new_status):
             raise InvalidStateTransition(
-                f"Cannot transition from {self.status} to {new_status}"
+                f"Domain Error: Cannot transition from {self.status} to {new_status}"
             )
+        
+        self._events.append(
+            ApplicationStatusChanged(
+                id=str(uuid4()),
+                occurred_at=datetime.now(timezone.utc),
+                application_id=self.id,
+                previous_status=self.status,
+                new_status=new_status,
+            )
+        )
+
+
         self.status = new_status
+        
         
     def _can_transition(self, new_status: ApplicationStatus) -> bool:
         transitions = {
             ApplicationStatus.CREATED: {
                 ApplicationStatus.VALIDATED,
+                ApplicationStatus.UNDER_REVIEW,
                 ApplicationStatus.REJECTED,
             },
             ApplicationStatus.VALIDATED: {
-                ApplicationStatus.UNDER_REVIEW,
+                # ApplicationStatus.UNDER_REVIEW,
                 ApplicationStatus.APPROVED,
                 ApplicationStatus.REJECTED,
             },
@@ -81,3 +105,10 @@ class CreditApplication:
             },
         }
         return new_status in transitions.get(self.status, set())
+
+    def pull_events(self) -> list[CoreEvent]:
+        events = self._events[:]
+        self._events.clear()
+        return events
+
+

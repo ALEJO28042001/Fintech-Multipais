@@ -14,7 +14,7 @@ class Money:
 
     def __post_init__(self):
         if self.amount <=  Decimal("0"):
-            raise CoreValidationError("Amount must be greater than zero")
+            raise CoreValidationError("Domain Error: Amount must be greater than zero")
 
 @dataclass(frozen=True)
 class Income:
@@ -26,7 +26,7 @@ class Income:
 
     def __post_init__(self):
         if self.monthly_amount <= Decimal("0"):
-            raise CoreValidationError("Monthly income must be greater than zero")
+            raise CoreValidationError("Domain Error: Monthly income must be greater than zero")
 
 @dataclass(frozen=True)
 class Document:
@@ -40,7 +40,7 @@ class Document:
 
     def __post_init__(self):
         if not self.value or not self.value.strip():
-            raise CoreValidationError("Document value cannot be empty")
+            raise CoreValidationError("Domain Error: Document value cannot be empty")
 
     def masked(self) -> str:
         """

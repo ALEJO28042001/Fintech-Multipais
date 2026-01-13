@@ -3,6 +3,7 @@ from decimal import Decimal
 from core.countries.base import CountryPolicy
 from core.credit_applications.enums import DocumentType
 from core.exceptions import CoreValidationError
+from core.credit_applications.enums import ApplicationStatus
 
 class PortugalPolicy(CountryPolicy):
     """
@@ -16,7 +17,6 @@ class PortugalPolicy(CountryPolicy):
     def validate(self, application):
         self._validate_document_type(application.applicant.document.document_type)
         self._validate_document_format(application.applicant.document.value)
-        self._validate_affordability(application)
 
     def _validate_document_type(self, document_type):
         if document_type != DocumentType.NIF:
@@ -24,7 +24,7 @@ class PortugalPolicy(CountryPolicy):
 
     def _validate_document_format(self, nif: str) -> None:
         if not self.NIF_REGEX.match(nif):
-            raise CoreValidationError("Invalid NIF format")
+            raise CoreValidationError("Policy Error: Invalid NIF format")
 
         # Optional: PT NIFs usually start with 1, 2, 3, 5, 6, 8, or 9
         if nif[0] not in "1235689":
@@ -39,15 +39,15 @@ class PortugalPolicy(CountryPolicy):
         check_digit = 0 if remainder < 2 else 11 - remainder
 
         if digits[8] != check_digit:
-            raise CoreValidationError("Invalid NIF control digit")
+            raise CoreValidationError("Policy Error: Invalid NIF control digit")            
 
-    def _validate_affordability(self, application):
-        # Using a helper variable for readability
+    def evaluate(self, application):
         monthly_income = application.monthly_income.monthly_amount
         max_allowed = monthly_income * self.MAX_INCOME_MULTIPLIER
+        #f"Policy Error: Requested amount exceeds the {self.MAX_INCOME_MULTIPLIER}x "
+        # "income limit for Portugal"
 
         if application.requested_amount.amount > max_allowed:
-            raise CoreValidationError(
-                f"Requested amount exceeds the {self.MAX_INCOME_MULTIPLIER}x "
-                "income limit for Portugal"
-            )
+            return ApplicationStatus.REJECTED
+
+        return ApplicationStatus.VALIDATED

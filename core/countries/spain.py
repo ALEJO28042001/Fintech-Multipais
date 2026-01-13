@@ -3,6 +3,7 @@ from core.credit_applications.enums import DocumentType
 from core.exceptions import CoreValidationError
 import re
 from decimal import Decimal
+from core.credit_applications.enums import ApplicationStatus
 
 class SpainPolicy(CountryPolicy):
 
@@ -19,15 +20,15 @@ class SpainPolicy(CountryPolicy):
     def _validate_document_type(self, document_type):
         if document_type != DocumentType.DNI:
             raise CoreValidationError(
-                "Spain requires DNI document"
+                "Policy Error: Spain requires DNI document"
             )
 
     def _validate_document_format(self, dni: str) -> None:
         if not re.match(r"^[0-9]{8}[A-Z]$", dni):
-            raise CoreValidationError("Invalid DNI format")
+            raise CoreValidationError("Policy Error: Invalid DNI format")
+        
+    def evaluate(self, application):
+        if application.requested_amount.amount > self.REVIEW_THRESHOLD:
+            return ApplicationStatus.UNDER_REVIEW
 
-    def requires_additional_review(self, application) -> bool:
-        return (
-            application.requested_amount.amount
-            > self.REVIEW_THRESHOLD
-        )
+        return ApplicationStatus.VALIDATED
