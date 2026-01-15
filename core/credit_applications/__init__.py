@@ -1,6 +1,7 @@
 from core.credit_applications.entities import (
     CreditApplication,
     Applicant,
+    BankSnapshot
 )
 from core.credit_applications.value_objects import (
     Money,

@@ -52,10 +52,8 @@ class CreditApplication:
     applicant: Applicant
     requested_amount: Money
     monthly_income: Income
-    bank_snapshot: Optional[BankSnapshot] = field(
-        default=None,
-        repr=False,
-    )
+    bank_snapshot: BankSnapshot | None = field(default=None, init=False)
+
     status: ApplicationStatus = field(
             default=ApplicationStatus.CREATED,
             init=False
@@ -63,6 +61,11 @@ class CreditApplication:
 
     _events: list[CoreEvent] = field(default_factory=list, init=False)
 
+    def attach_bank_snapshot(self, snapshot: BankSnapshot) -> None:
+        if self.bank_snapshot is not None:
+            raise CoreError("Bank snapshot already attached")
+
+        self.bank_snapshot = snapshot
 
     def change_status(self, new_status: ApplicationStatus) -> None:
         """
@@ -70,7 +73,7 @@ class CreditApplication:
         """
         if not self._can_transition(new_status):
             raise InvalidStateTransition(
-                f"Domain Error: Cannot transition from {self.status} to {new_status}"
+                f"Core Error: Cannot transition from {self.status} to {new_status}"
             )
         
         self._events.append(
@@ -100,8 +103,9 @@ class CreditApplication:
                 ApplicationStatus.REJECTED,
             },
             ApplicationStatus.UNDER_REVIEW: {
-                ApplicationStatus.APPROVED,
+                # ApplicationStatus.APPROVED,
                 ApplicationStatus.REJECTED,
+                ApplicationStatus.VALIDATED,
             },
         }
         return new_status in transitions.get(self.status, set())

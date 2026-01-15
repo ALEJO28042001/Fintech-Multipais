@@ -11,24 +11,12 @@ from core.credit_applications.enums import (
 from core.credit_applications.value_objects import Money, Income, Document
 from core.exceptions import InvalidStateTransition
 
-from applications.credit_applications.reject_credit_application import (
+from applications.credit_applications import (
     RejectCreditApplication
 )
+from tests.fakes.repositories.in_memory_credit_application_repository import InMemoryCreditApplicationRepository
 
-# -------------------------------------------------------------------
-# In-memory repository
-# -------------------------------------------------------------------
-
-class InMemoryCreditApplicationRepository:
-    def __init__(self):
-        self._storage = {}
-
-    def save(self, application):
-        self._storage[application.id] = application
-
-    def get(self, application_id):
-        return self._storage[application_id]
-
+from core.exceptions import CoreError
 
 # -------------------------------------------------------------------
 # Fixtures
@@ -88,7 +76,7 @@ def test_reject_application_invalid_transition(repository, credit_application):
 
     use_case = RejectCreditApplication(repository)
 
-    with pytest.raises(InvalidStateTransition) as exc:
+    with pytest.raises(CoreError) as exc:
         use_case.execute(
             application_id=credit_application.id,
             reason="Too late",

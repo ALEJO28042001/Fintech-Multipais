@@ -11,7 +11,7 @@ from core.credit_applications.enums import (
 from core.credit_applications.value_objects import Money, Income, Document
 from core.exceptions import InvalidStateTransition
 
-from applications.credit_applications.update_application_state import (
+from applications.credit_applications import (
     UpdateCreditApplicationState
 )
 

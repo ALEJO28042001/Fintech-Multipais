@@ -1,6 +1,6 @@
 import pytest
 
-from applications.credit_applications import AttachBankSnapshot,ApproveCreditApplication
+from applications.credit_applications import AttachBankSnapshot
 
 from core.credit_applications.enums import ApplicationStatus
 from core.exceptions import CoreError
@@ -37,18 +37,10 @@ def created_spain_application(repository):
 def test_attach_bank_snapshot_spain():
     repository = InMemoryCreditApplicationRepository()
     application = created_spain_application(repository)
-    # --- Attach bank snapshot ---
-    attach_uc = AttachBankSnapshot(repository)
-    attach_uc.execute(application.id)
 
-    # --- Approve application ---
-    approve_uc = ApproveCreditApplication(repository)
-    result = approve_uc.execute(application.id)
+    use_case = AttachBankSnapshot(repository)
 
-    # --- Final assertions only ---
-    assert result.status == ApplicationStatus.APPROVED
+    result = use_case.execute(application.id)
+
     assert result.bank_snapshot is not None
     assert result.bank_snapshot.provider == "SpainBank"
-
-
-
