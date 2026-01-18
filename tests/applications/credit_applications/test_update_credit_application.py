@@ -43,13 +43,13 @@ def repository():
 def credit_application(repository):
     app = CreditApplication(
         id="app-1",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("5000"), Currency.EUR),

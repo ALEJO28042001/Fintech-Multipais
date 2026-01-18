@@ -3,13 +3,17 @@
 This project implements the core domain of a multi-country credit application system, focusing on clean domain modeling and business rule isolation.
 The design allows the solution to scale by adding new countries, rules, and integrations without impacting existing functionality.
 
-Project Status
+# Project Status
 
 This project is under active development.
 
-✔ Core layer is fully implemented and unit tested
-✔ Application layer (use cases) is implemented and tested
-🚧 Infrastructure layer is intentionally minimal (in-memory, fakes only)
+✅ Core domain implemented
+✅ Application use cases implemented
+✅ API layer implemented
+✅ Bank providers implemented
+✅ In-memory and PostgreSQL repositories implemented
+✅ Database schema created
+✅ End-to-end flows tested
 
 
 ## Architecture
@@ -21,12 +25,23 @@ The solution follows a layered architecture:
 - **Infrastructure**: API, persistence, external services *(fakes)*
 - **Tests**: All necessary units at this point
 
+api → applications → core
+           ↑
+     infrastructure
+
+
 ## Core Domain
 
 The core domain contains all business rules related to multi-country credit applications.
 It is completely independent of frameworks, databases, and external services.
 Core has no dependencies on outer layers.
 Outer layers depend on the core.
+
+### Credit Application Lifecycle
+
+CREATED → VALIDATED | UNDER_REVIEW | REJECTED
+VALIDATED / UNDER_REVIEW → APPROVED | REJECTED
+
 
 ### Responsibilities
 
@@ -43,8 +58,9 @@ core/
 │   ├── entities.py
 │   ├── value_objects.py
 │   ├── enums.py
+│   ├── repository.py
 │   └── events.py
-└── countries/
+└── policies/
     ├── base.py
     ├── spain.py
     └── portugal.py
@@ -72,24 +88,139 @@ Each use case:
     - Persists changes via repositories
     - Enforces business intent
 
+### Structure
+
+applications/
+└── credit_applications/
+    │
+    ├── use_cases/
+    │   ├── approve_credit_application.py
+    │   ├── attach_bank_snapshot.py
+    │   ├── create_credit_application.py
+    │   ├── get_credit_application.py
+    │   ├── list_credit_applications.py
+    │   ├── reject_credit_application.py
+    │   └── __init__.py
+    │
+    ├── policy_registry.py
+    ├── update_application_state.py
+    └── __init__.py
+
+
 ### Implemented Use Cases
 
     - Create credit application
     - Attach bank snapshot
     - Approve credit application
     - Reject credit application
-    - Update application state
+    - Update credit application state
+    - Get credit application
+    - List credit applications
 
 ## Infrastructure 
 The infrastructure layer contains replaceable adapters.
 
 Current implementations:
-    - In-memory repositories (for testing)
-    - Fake bank providers (Spain, Portugal)
+    - In-memory,PostgreSQL repositories
+    - Bank providers per country for Portugal and Spain
+    - SQLAlchemy models and database configuration
+    - External system adapters
 
-This layer exists to support integration, not to define behavior.
+### Bank Integration
 
-Use cases are explicit, testable, and side-effect free except for persistence calls.
+    - Bank providers are implemented per country
+    - Providers fetch raw external data and adapt it into an immutable domain BankSnapshot
+    - Bank snapshots:
+        - Can only be attached in VALIDATED or UNDER_REVIEW
+        - Are required before approval
+        - Are immutable once attached
+
+### Persistence Strategy
+
+#### Repositories
+
+    - Repository interfaces are defined in core
+    - Implementations live in infrastructure
+    - Two implementations exist:
+        - In-memory (tests)
+        - PostgreSQL (production)
+
+#### Domain ↔ Persistence Mapping
+
+    - Domain objects are never persisted directly
+    - Value objects and snapshots are serialized at repository boundaries
+    - BankSnapshot is stored as JSON and rehydrated when loading
+
+This preserves domain purity while allowing flexible storage.
+
+### Database
+
+    - PostgreSQL
+    - SQLAlchemy ORM
+    - Timezone-aware timestamps
+    - JSON storage for bank snapshots
+    - Simple string storage for enums (country, status,money,bank snapshot)
+
+### Structure
+
+infrastructure/
+├── bank_providers/
+│   ├── countries/
+│   │   ├── portugal.py
+│   │   ├── spain.py
+│   │   └── __init__.py
+│   │
+│   ├── base.py
+│   ├── exceptions.py
+│   ├── registry.py
+│   └── __init__.py
+│
+├── database/
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── credit_application.py
+│   │
+│   ├── session.py
+|   ├── base.py
+│   └── __init__.py
+│
+├── repositories/
+│   ├── __init__.py
+│   ├── in_memory_credit_application.py
+│   └── postgres_credit_application.py
+│
+└── __init__.py
+
+## API 
+
+    - FastAPI-based HTTP layer
+    - Request / response DTOs
+    - Dependency injection for repositories and use cases
+    - Domain errors mapped to HTTP responses
+    - Explicit request and response models
+
+### Structure
+
+api/
+│
+├── auth/
+│   ├── dependencies.py
+│   └── jwt.py
+│
+├── realtime/
+│   └── websocket_manager.py
+│
+├── routers/
+│   └── credit_applications.py
+│
+├── schemas/
+│   ├── requests.py
+│   └── responses.py
+│
+├── dependencies.py
+├── errors.py
+└── main.py
+
 
 ## Testing
 

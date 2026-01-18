@@ -5,7 +5,7 @@ class CoreError(Exception):
     pass
 
 
-class CoreValidationError(CoreError):
+class ValidationError(CoreError):
     """
     Raised when business rules are violated.
     """
@@ -17,3 +17,14 @@ class InvalidStateTransition(CoreError):
     Raised when an invalid state change is attempted.
     """
     pass
+
+class InvalidStateError(CoreError):
+    """Illegal state transition attempted"""
+
+
+class NotFoundError(CoreError):
+    """Entity not found"""
+
+
+class PermissionError(CoreError):
+    """Action not allowed by business rules"""

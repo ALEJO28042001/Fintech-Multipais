@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from core.credit_applications.entities import CreditApplication
 from core.credit_applications.enums import ApplicationStatus
 
-class CountryPolicy(ABC):
+class CreditPolicy(ABC):
     """
     Base contract for country-specific business rules.
     """
@@ -10,7 +10,7 @@ class CountryPolicy(ABC):
     @abstractmethod
     def validate(self, application: CreditApplication) -> None:
         """
-        Raises CoreValidationError if the application is invalid.
+        Raises ValidationError if the application is invalid.
         """
         pass
 

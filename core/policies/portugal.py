@@ -1,11 +1,11 @@
 import re
 from decimal import Decimal
-from core.countries.base import CountryPolicy
+from core.policies.base import CreditPolicy
 from core.credit_applications.enums import DocumentType
-from core.exceptions import CoreValidationError
+from core.exceptions import ValidationError
 from core.credit_applications.enums import ApplicationStatus
 
-class PortugalPolicy(CountryPolicy):
+class PortugalPolicy(CreditPolicy):
     """
     Country-specific business rules for Portugal (PT).
     """
@@ -20,15 +20,15 @@ class PortugalPolicy(CountryPolicy):
 
     def _validate_document_type(self, document_type):
         if document_type != DocumentType.NIF:
-            raise CoreValidationError("Portugal requires NIF document")
+            raise ValidationError("Portugal requires NIF document")
 
     def _validate_document_format(self, nif: str) -> None:
         if not self.NIF_REGEX.match(nif):
-            raise CoreValidationError("Policy Error: Invalid NIF format")
+            raise ValidationError("Policy Error: Invalid NIF format")
 
         # Optional: PT NIFs usually start with 1, 2, 3, 5, 6, 8, or 9
         if nif[0] not in "1235689":
-             raise CoreValidationError("Invalid NIF: unrecognized starting digit")
+             raise ValidationError("Invalid NIF: unrecognized starting digit")
 
         digits = [int(d) for d in nif]
         
@@ -39,7 +39,7 @@ class PortugalPolicy(CountryPolicy):
         check_digit = 0 if remainder < 2 else 11 - remainder
 
         if digits[8] != check_digit:
-            raise CoreValidationError("Policy Error: Invalid NIF control digit")            
+            raise ValidationError("Policy Error: Invalid NIF control digit")            
 
     def evaluate(self, application):
         monthly_income = application.monthly_income.monthly_amount

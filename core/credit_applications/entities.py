@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime,timezone
+from datetime import datetime, UTC,timezone
 from uuid import uuid4
 from decimal import Decimal
 from typing import Optional
@@ -58,6 +58,10 @@ class CreditApplication:
             default=ApplicationStatus.CREATED,
             init=False
         )
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(UTC),
+        init=False,
+    )
 
     _events: list[CoreEvent] = field(default_factory=list, init=False)
 

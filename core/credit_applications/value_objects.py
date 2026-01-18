@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from core.exceptions import CoreValidationError
+from core.exceptions import ValidationError
 from core.credit_applications.enums import Currency
 from core.credit_applications.enums import DocumentType, Country
 
@@ -14,7 +14,7 @@ class Money:
 
     def __post_init__(self):
         if self.amount <=  Decimal("0"):
-            raise CoreValidationError("Core Error: Amount must be greater than zero")
+            raise ValidationError("Core Error: Amount must be greater than zero")
 
 @dataclass(frozen=True)
 class Income:
@@ -26,7 +26,7 @@ class Income:
 
     def __post_init__(self):
         if self.monthly_amount <= Decimal("0"):
-            raise CoreValidationError("Core Error: Monthly income must be greater than zero")
+            raise ValidationError("Core Error: Monthly income must be greater than zero")
 
 @dataclass(frozen=True)
 class Document:
@@ -40,7 +40,7 @@ class Document:
 
     def __post_init__(self):
         if not self.value or not self.value.strip():
-            raise CoreValidationError("Core Error: Document value cannot be empty")
+            raise ValidationError("Core Error: Document value cannot be empty")
 
     def masked(self) -> str:
         """

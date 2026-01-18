@@ -6,7 +6,7 @@ class Country(str, Enum):
     """
     PT = "PT"
     IT = "IT"
-    ES = "ES"
+    SP = "SP"
     MX = "MX"
     BR = "BR"
     CO = "CO"

@@ -1,5 +1,5 @@
 from core.credit_applications.enums import ApplicationStatus
-from core.exceptions import CoreValidationError
+from core.exceptions import ValidationError
 
 
 class RejectCreditApplication:
@@ -13,7 +13,7 @@ class RejectCreditApplication:
     def execute(
         self,
         application_id: str,
-        reason: str | None = None,
+        # reason: str | None = None,
     ):
         application = self.repository.get(application_id)
 
@@ -22,7 +22,7 @@ class RejectCreditApplication:
             ApplicationStatus.APPROVED,
             ApplicationStatus.REJECTED,
         }:
-            raise CoreValidationError(
+            raise ValidationError(
                 f"Application cannot be rejected in state {application.status}"
             )
 

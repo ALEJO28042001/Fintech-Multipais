@@ -15,13 +15,13 @@ from core.exceptions import InvalidStateTransition
 def test_valid_status_transition():
     app = CreditApplication(
         id="app-1",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("1000"), Currency.EUR),
@@ -35,13 +35,13 @@ def test_valid_status_transition():
 def test_invalid_status_transition():
     app = CreditApplication(
         id="app-1",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("1000"), Currency.EUR),

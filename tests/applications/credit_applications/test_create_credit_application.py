@@ -20,13 +20,13 @@ def test_create_credit_application_success():
 
     application = CreditApplication(
         id="app-1",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("5000"), Currency.EUR),
@@ -47,13 +47,13 @@ def test_create_credit_application_twice_fails():
 
     application = CreditApplication(
         id="app-1",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("5000"), Currency.EUR),
@@ -75,7 +75,7 @@ def test_create_credit_application_invalid_document_fails():
 
     application = CreditApplication(
         id="app-2",
-        country=Country.ES,
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(

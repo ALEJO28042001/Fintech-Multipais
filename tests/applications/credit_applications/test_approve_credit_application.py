@@ -18,14 +18,14 @@ def created_spain_application(repository):
     use_case = CreateCreditApplication(repository)
 
     app = CreditApplication(
-        id="app-es-1",
-        country=Country.ES,
+        id="app-SP-1",
+        country=Country.SP,
         applicant=Applicant(
             full_name="Juan Perez",
             document=Document(
                 document_type=DocumentType.DNI,
                 value="12345678Z",
-                country=Country.ES,
+                country=Country.SP,
             ),
         ),
         requested_amount=Money(Decimal("5000"), Currency.EUR),

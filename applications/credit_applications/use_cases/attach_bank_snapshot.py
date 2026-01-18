@@ -1,11 +1,12 @@
 from core.exceptions import CoreError
-from infrastructure.bank_providers import get_bank_provider
 from core.credit_applications.repository import CreditApplicationRepository
 from core.credit_applications.enums import ApplicationStatus
 
 class AttachBankSnapshot:
-    def __init__(self, repository: CreditApplicationRepository):
+    def __init__(self, repository, bank_provider_selector):
         self.repository = repository
+        self.bank_provider_selector = bank_provider_selector
+
 
     def execute(self, application_id: str):
         application = self.repository.get(application_id)
@@ -19,7 +20,7 @@ class AttachBankSnapshot:
                 f"Cannot fetch bank data in state {application.status}"
             )
 
-        provider = get_bank_provider(application.country)
+        provider = self.bank_provider_selector(application.country)
 
         if not provider:
             raise CoreError(

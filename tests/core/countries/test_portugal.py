@@ -1,7 +1,7 @@
 import pytest
 from decimal import Decimal
 
-from core.countries.portugal import PortugalPolicy
+from core.policies.portugal import PortugalPolicy
 from core.credit_applications.entities import CreditApplication, Applicant
 from core.credit_applications.value_objects import Money, Income, Document
 from core.credit_applications.enums import (
@@ -9,7 +9,7 @@ from core.credit_applications.enums import (
     Currency,
     DocumentType,
 )
-from core.exceptions import CoreValidationError
+from core.exceptions import ValidationError
 
 def test_portugal_accepts_valid_application():
     policy = PortugalPolicy()
@@ -50,7 +50,7 @@ def test_portugal_rejects_non_nif_document():
         monthly_income=Income(Decimal("2000"), Currency.EUR),
     )
 
-    with pytest.raises(CoreValidationError) as exc_info:
+    with pytest.raises(ValidationError) as exc_info:
         policy.validate(app)
 
     print("EXPECTED ERROR:", exc_info.value)
@@ -73,7 +73,7 @@ def test_portugal_rejects_unverified_document():
         monthly_income=Income(Decimal("2000"), Currency.EUR),
     )
 
-    with pytest.raises(CoreValidationError) as exc_info:
+    with pytest.raises(ValidationError) as exc_info:
         policy.validate(app)
 
     print("EXPECTED ERROR:", exc_info.value)

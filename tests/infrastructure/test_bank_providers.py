@@ -14,7 +14,7 @@ from infrastructure.bank_providers import (
 # -------------------------------------------------------
 
 def test_factory_returns_spain_provider():
-    provider = get_bank_provider(Country.ES)
+    provider = get_bank_provider(Country.SP)
 
     assert isinstance(provider, SpainBankProvider)
     assert isinstance(provider, BankProvider)
@@ -40,7 +40,7 @@ def test_factory_raises_for_unsupported_country():
 
 def test_factory_raises_for_invalid_type():
     with pytest.raises(TypeError) as exc:
-        get_bank_provider("ES")  # wrong type
+        get_bank_provider("SP")  # wrong type
 
     print(f"Raised error: {exc.value}")
 
